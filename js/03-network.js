@@ -1,9 +1,3 @@
-// 03-network.js
-// PeerJS setup, host/guest connections, broadcast helpers.
-
-// ═══════════════════════════════════════════
-// §4  NETWORKING
-// ═══════════════════════════════════════════
 function initPeer(specId) {
     return new Promise((res, rej) => {
         const cfg = {
@@ -34,7 +28,6 @@ function initPeer(specId) {
         setTimeout(() => rej(new Error("Timeout")), 15000);
     });
 }
-
 function onConn(conn) {
     conn.on("open", () => {
         S.conns[conn.peer] = conn;
@@ -43,8 +36,6 @@ function onConn(conn) {
         conn.on("error", (e) => console.warn("conn err", e));
     });
 }
-
-// Guest receives host's audio stream
 function onCall(call) {
     call.answer();
     call.on("stream", (stream) => {
@@ -57,7 +48,6 @@ function onCall(call) {
         if (S.aud.srcObject) S.aud.srcObject = null;
     });
 }
-
 function peerGone(pid) {
     delete S.conns[pid];
     if (S.calls[pid]) {
@@ -81,7 +71,6 @@ function peerGone(pid) {
     if (S.isHost) bcast({ type: M.MEMBERS, members: S.members });
     if (!S.isHost && pid === S.hostPid) toast("Host đã rời phòng!", "err");
 }
-
 async function connectHost(hostPid) {
     return new Promise((res, rej) => {
         const c = S.peer.connect(hostPid, { reliable: true, serialization: "json" });
@@ -90,7 +79,6 @@ async function connectHost(hostPid) {
             S.hostPid = hostPid;
             c.on("data", (d) => onMsg(d, hostPid));
             c.on("close", () => peerGone(hostPid));
-            // announce
             c.send({ type: M.JOIN, uid: S.uid, name: san(S.name, 20), peerId: S.peer.id });
             res();
         });
@@ -98,7 +86,6 @@ async function connectHost(hostPid) {
         setTimeout(() => rej(new Error("Timeout kết nối")), 13000);
     });
 }
-
 function send(pid, msg) {
     const c = S.conns[pid];
     if (c?.open) c.send(msg);
@@ -106,12 +93,10 @@ function send(pid, msg) {
 function bcast(msg, skip) {
     for (const [pid, c] of Object.entries(S.conns)) if (pid !== skip && c?.open) c.send(msg);
 }
-// Send request to host (or process directly if we are host)
 function toHost(msg) {
     if (S.isHost) onMsg({ ...msg, from: S.uid }, "__self__");
     else send(S.hostPid, { ...msg, from: S.uid });
 }
-// Broadcast to all peers AND apply locally
 function bcastSelf(msg) {
     bcast(msg);
     onMsg(msg, "__self__");

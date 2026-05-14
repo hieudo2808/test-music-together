@@ -1,16 +1,8 @@
-// 08-render.js
-// UI render functions for controls, queue, members, chat, and status.
-
-// ═══════════════════════════════════════════
-// §11  RENDER FUNCTIONS
-// ═══════════════════════════════════════════
 function renderCtrl() {
     const pp = $("btn-pp");
     pp.textContent = S.playing ? "⏸" : "▶";
-    // sync animated bars
     document.querySelectorAll(".bars").forEach((b) => b.classList.toggle("paused", !S.playing));
 }
-
 function renderQueue() {
     const list = $("q-list");
     $("q-count").textContent = `${S.queue.length} bài`;
@@ -51,11 +43,9 @@ function renderQueue() {
             toHost({ type: M.R_RM, idx: +btn.dataset.i });
         });
     });
-    // Scroll active into view
     const active = list.querySelector(".q-item.active");
     if (active) active.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
-
 function renderMembers() {
     const list = $("mbr-list");
     const entries = Object.entries(S.members);
@@ -79,7 +69,6 @@ function renderMembers() {
         })
         .join("");
 }
-
 function sysChat(txt) {
     const el = document.createElement("div");
     el.className = "chat-sys";
@@ -106,7 +95,6 @@ function scrollChat() {
     const c = $("chat-msgs");
     c.scrollTop = c.scrollHeight;
 }
-
 function setStatus(txt, cls = "") {
     const el = $("hdr-status");
     el.textContent = txt;

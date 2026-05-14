@@ -1,9 +1,3 @@
-// 05-playback.js
-// Playback control logic and client-side apply handlers.
-
-// ═══════════════════════════════════════════
-// §6  HOST PLAYBACK ACTIONS
-// ═══════════════════════════════════════════
 function getT() {
     const tr = S.queue[S.idx];
     if (!tr) return 0;
@@ -29,7 +23,6 @@ function getDur() {
     }
     return isFinite(S.aud.duration) ? S.aud.duration : 0;
 }
-
 function hPlay() {
     S.playing = true;
     const tr = S.queue[S.idx];
@@ -70,7 +63,6 @@ function stopPlayer() {
         S.aud.removeAttribute("src");
     }
 }
-
 function playNext() {
     if (!S.isHost || !S.queue.length) return;
     let n;
@@ -94,10 +86,6 @@ function playPrev() {
     }
     hLoad(Math.max(0, S.idx - 1), 0, true);
 }
-
-// ═══════════════════════════════════════════
-// §7  CLIENT APPLY EVENTS
-// ═══════════════════════════════════════════
 function applyPlay(t) {
     S.playing = true;
     const tr = S.queue[S.idx];
@@ -134,30 +122,25 @@ function applySeek(t) {
     S.curT = t;
     if (!S.seekDrag) renderSeek();
 }
-
 function applyLoad(idx, st, play) {
     const tr = S.queue[idx];
     if (!tr) return;
     S.idx = idx;
     S.playing = !!play;
-
     const ytW = $("yt-wrap"),
         spW = $("sp-wrap");
     ytW.classList.remove("show");
     ytW.style.display = "none";
     spW.classList.remove("show");
     spW.style.display = "none";
-
     $("trk-title").textContent = tr.title;
     $("trk-sub").textContent = `Thêm bởi ${tr.addedBy}`;
     const art = $("trk-art");
-
     if (tr.type === "youtube") {
         ytW.style.display = "block";
         setTimeout(() => ytW.classList.add("show"), 10);
         art.innerHTML = tr.thumb ? `<img src="${esc(tr.thumb)}" alt="" loading="lazy">` : "▶️";
         if (S.ytOK && S.yt) {
-            // Check if YT player element still exists in DOM
             try {
                 S.yt.loadVideoById({ videoId: tr.videoId, startSeconds: st });
                 if (!play) setTimeout(() => S.yt.pauseVideo(), 800);
@@ -175,7 +158,6 @@ function applyLoad(idx, st, play) {
       allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture"
       style="border-radius:10px"></iframe>`;
     } else {
-        // file — host plays locally, guests hear stream
         art.textContent = "📁";
         if (S.isHost) {
             if (st > 0 && !S.aud.srcObject) S.aud.currentTime = st;

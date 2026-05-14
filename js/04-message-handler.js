@@ -1,13 +1,5 @@
-// 04-message-handler.js
-// Central message router for host requests and synced client events.
-
-// ═══════════════════════════════════════════
-// §5  MESSAGE HANDLER
-// ═══════════════════════════════════════════
 function onMsg(msg, from) {
     if (!valid(msg)) return;
-
-    // ── HOST handles requests ──
     if (S.isHost) {
         switch (msg.type) {
             case M.JOIN: {
@@ -18,14 +10,12 @@ function onMsg(msg, from) {
                 renderMembers();
                 sysChat(`${name} đã tham gia 🎉`);
                 bcast({ type: M.MEMBERS, members: S.members }, from);
-                // If currently streaming audio file, call new peer
                 if (S.asDst && from !== "__self__") {
                     try {
                         const cl = S.peer.call(from, S.asDst.stream);
                         S.calls[from] = cl;
                     } catch (e) {}
                 }
-                // Full sync
                 send(from, {
                     type: M.SYNC,
                     queue: S.queue,
@@ -91,8 +81,6 @@ function onMsg(msg, from) {
             }
         }
     }
-
-    // ── ALL clients handle events ──
     switch (msg.type) {
         case M.SYNC:
             S.queue = (Array.isArray(msg.queue) ? msg.queue : []).map(cleanTrack).filter(Boolean);

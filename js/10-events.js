@@ -1,11 +1,4 @@
-// 10-events.js
-// DOMContentLoaded bootstrap and all UI event listeners.
-
-// ═══════════════════════════════════════════
-// §13  EVENT LISTENERS
-// ═══════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", () => {
-    // ── Session ──
     if (S.name) {
         $("l-cname").value = S.name;
         $("l-jname").value = S.name;
@@ -17,8 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (e) {}
         }
     });
-
-    // ── Theme ──
     const savedTheme = localStorage.getItem("syncbeat_theme");
     if (savedTheme === "light") {
         document.documentElement.classList.add("light-theme");
@@ -29,8 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("syncbeat_theme", isLight ? "light" : "dark");
         });
     });
-
-    // ── Landing ──
     $("l-bcreate").addEventListener("click", createRoom);
     $("l-bjoin").addEventListener("click", joinRoom);
     $("l-cname").addEventListener("keydown", (e) => e.key === "Enter" && createRoom());
@@ -39,14 +28,11 @@ document.addEventListener("DOMContentLoaded", () => {
     $("l-jcode").addEventListener("input", (e) => {
         e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
     });
-    // Auto-fill from URL ?room=XXXXXX
     const urlP = new URLSearchParams(location.search).get("room") || "";
     if (/^[A-Z0-9]{6}$/i.test(urlP)) {
         $("l-jcode").value = urlP.toUpperCase();
         setTimeout(() => $("l-jname").focus(), 100);
     }
-
-    // ── Header ──
     $("btn-leave").addEventListener("click", leaveRoom);
     $("btn-copy").addEventListener("click", () => {
         navigator.clipboard.writeText(S.room).then(() => toast("Đã copy mã phòng!", "ok"));
@@ -55,8 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const url = `${location.origin}${location.pathname}?room=${S.room}`;
         navigator.clipboard.writeText(url).then(() => toast("Đã copy link mời!", "ok"));
     });
-
-    // ── Playback controls ──
     $("btn-pp").addEventListener("click", () => {
         if (!S.queue.length) {
             toast("Thêm bài hát trước đã!", "info");
@@ -91,13 +75,10 @@ document.addEventListener("DOMContentLoaded", () => {
         $("btn-rep").classList.toggle("on", S.repeat);
         toast(S.repeat ? "🔁 Lặp lại bật" : "🔁 Lặp lại tắt", "info");
     });
-
-    // ── Seek bar ──
     const seekInp = $("seek-inp");
     const seekTrk = $("seek-track");
     const seekFill = $("seek-fill");
     const seekThumb = $("seek-thumb");
-
     function seekStart() {
         S.seekDrag = true;
         seekTrk.classList.add("drag");
@@ -109,12 +90,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const dur = S.isHost ? getDur() : S.dur;
         toHost({ type: M.R_SEEK, t: pct * dur });
     }
-
     seekInp.addEventListener("mousedown", seekStart);
     seekInp.addEventListener("touchstart", seekStart, { passive: true });
     seekInp.addEventListener("mouseup", seekEnd);
     seekInp.addEventListener("touchend", seekEnd);
-
     seekInp.addEventListener("input", () => {
         const pct = seekInp.value / 100000;
         const dur = S.isHost ? getDur() : S.dur;
@@ -124,8 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
         seekFill.style.transition = "none";
         setTimeout(() => (seekFill.style.transition = ""), 50);
     });
-
-    // ── Volume ──
     const volInp = $("vol-inp");
     volInp.addEventListener("input", () => {
         const v = volInp.value / 100;
@@ -139,8 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const ic = $("vol-ic");
         ic.textContent = v === 0 ? "🔇" : v < 0.4 ? "🔈" : v < 0.75 ? "🔉" : "🔊";
     });
-
-    // ── Keyboard shortcuts ──
     document.addEventListener("keydown", (e) => {
         if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
         if ($("scr-room").hidden) return;
@@ -155,8 +130,6 @@ document.addEventListener("DOMContentLoaded", () => {
             hSeek(getT() + 10);
         }
     });
-
-    // ── Tab switching (Add track form) ──
     document.querySelectorAll(".tab-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
             const tab = btn.dataset.tab;
@@ -166,8 +139,6 @@ document.addEventListener("DOMContentLoaded", () => {
             $("tab-" + tab).classList.add("on");
         });
     });
-
-    // ── Add YouTube ──
     function addYT() {
         const url = $("yt-inp").value.trim();
         const vid = parseYT(url);
@@ -190,8 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     $("btn-addyt").addEventListener("click", addYT);
     $("yt-inp").addEventListener("keydown", (e) => e.key === "Enter" && addYT());
-
-    // ── Add file ──
     const fileInp = $("file-inp");
     const fileZone = $("file-zone");
     fileInp.addEventListener("change", (e) => {
@@ -210,8 +179,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const f = e.dataTransfer.files[0];
         if (f) handleFile(f);
     });
-
-    // ── Add Spotify ──
     function addSP() {
         const url = $("sp-inp").value.trim();
         const sp = parseSP(url);
@@ -235,8 +202,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     $("btn-addsp").addEventListener("click", addSP);
     $("sp-inp").addEventListener("keydown", (e) => e.key === "Enter" && addSP());
-
-    // ── Chat ──
     function sendChat() {
         const text = san($("chat-inp").value);
         if (!text) return;
@@ -245,8 +210,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     $("btn-send").addEventListener("click", sendChat);
     $("chat-inp").addEventListener("keydown", (e) => e.key === "Enter" && sendChat());
-
-    // ── Resume AudioContext on user gesture ──
     document.addEventListener(
         "click",
         () => {

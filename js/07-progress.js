@@ -1,11 +1,4 @@
-// 07-progress.js
-// Progress timer and seek bar rendering.
-
-// ═══════════════════════════════════════════
-// §10  PROGRESS & SEEK BAR
-// ═══════════════════════════════════════════
 setInterval(() => {
-    // Host broadcasts progress
     if (S.isHost && S.playing && S.idx >= 0) {
         const t = getT(),
             dur = getDur();
@@ -15,7 +8,6 @@ setInterval(() => {
     }
     if (!S.seekDrag) renderSeek();
 }, 500);
-
 function renderSeek() {
     let t = S.curT,
         dur = S.dur;

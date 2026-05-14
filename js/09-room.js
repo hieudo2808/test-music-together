@@ -1,9 +1,3 @@
-// 09-room.js
-// Create/join/enter/leave room flow.
-
-// ═══════════════════════════════════════════
-// §12  ROOM MANAGEMENT
-// ═══════════════════════════════════════════
 async function createRoom() {
     const name = san($("l-cname").value);
     if (!name) {
@@ -13,8 +7,6 @@ async function createRoom() {
     S.name = name;
     localStorage.setItem("syncbeat_name", name);
     S.isHost = true;
-
-    // Try up to 3 codes in case of conflict
     let attempts = 0;
     async function tryCreate() {
         S.room = genCode();
@@ -49,7 +41,6 @@ async function createRoom() {
     }
     await tryCreate();
 }
-
 async function joinRoom() {
     const name = san($("l-jname").value);
     const code = $("l-jcode").value.trim().toUpperCase();
@@ -68,7 +59,7 @@ async function joinRoom() {
     showLoad("Đang kết nối vào phòng...");
     try {
         await initYT();
-        await initPeer(); // random peer ID
+        await initPeer(); 
         await connectHost(`sb-${code}`);
         hideLoad();
         enterRoom();
@@ -85,7 +76,6 @@ async function joinRoom() {
         toast("Không thể kết nối: " + (e.message || "Phòng không tồn tại hoặc đã đóng"), "err");
     }
 }
-
 function enterRoom() {
     $("scr-land").hidden = true;
     $("scr-room").hidden = false;
@@ -103,7 +93,6 @@ function enterRoom() {
         sysChat("Đã vào phòng! Double-click vào bài hát để chuyển bài.");
     }
 }
-
 function leaveRoom() {
     if (!confirm("Bạn có muốn rời phòng?")) return;
     if (S.peer) {

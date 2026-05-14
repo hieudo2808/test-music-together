@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
@@ -13,11 +12,7 @@
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-    <!-- ╔══════════════════════╗ -->
-    <!-- ║    LANDING SCREEN   ║ -->
-    <!-- ╚══════════════════════╝ -->
     <div id="scr-land">
         <button class="btn-icon btn-theme-toggle" style="position:absolute; top:20px; right:20px; font-size:20px;" title="Đổi giao diện">🌓</button>
         <div class="land-hero">
@@ -25,19 +20,14 @@
             <h1>SyncBeat</h1>
             <p>Nghe nhạc cùng bạn bè — đồng bộ từng nhịp</p>
         </div>
-
         <div class="land-cards">
-            <!-- Tạo phòng -->
             <div class="l-card">
                 <h2>🎧 Tạo Phòng</h2>
                 <input class="inp" id="l-cname" type="text" placeholder="Tên của bạn" maxlength="20"
                     autocomplete="off" />
                 <button class="btn-primary" id="l-bcreate">Tạo Phòng Mới</button>
             </div>
-
             <div class="l-divider">— hoặc —</div>
-
-            <!-- Tham gia -->
             <div class="l-card">
                 <h2>🚀 Tham Gia</h2>
                 <input class="inp" id="l-jname" type="text" placeholder="Tên của bạn" maxlength="20"
@@ -48,12 +38,7 @@
             </div>
         </div>
     </div>
-
-    <!-- ╔══════════════════════╗ -->
-    <!-- ║     ROOM SCREEN     ║ -->
-    <!-- ╚══════════════════════╝ -->
     <div id="scr-room" hidden>
-        <!-- Header -->
         <header class="room-hdr">
             <span class="logo-sm">SyncBeat</span>
             <div class="room-code-pill">
@@ -71,10 +56,7 @@
                 <button class="btn-leave" id="btn-leave">Rời Phòng</button>
             </div>
         </header>
-
-        <!-- Body -->
         <div class="room-body">
-            <!-- LEFT: Members -->
             <div class="panel">
                 <div class="panel-hdr">Thành viên <span id="mbr-cnt">(0)</span></div>
                 <div class="panel-body">
@@ -86,20 +68,12 @@
                             "></ul>
                 </div>
             </div>
-
-            <!-- CENTER: Player + Queue -->
             <div class="player-col">
-                <!-- Player zone -->
                 <div class="player-zone">
-                    <!-- YouTube embed container -->
                     <div id="yt-wrap">
                         <div id="yt-el"></div>
                     </div>
-
-                    <!-- Spotify embed container -->
                     <div id="sp-wrap"></div>
-
-                    <!-- Track info -->
                     <div class="trk-row">
                         <div class="trk-art" id="trk-art">🎵</div>
                         <div class="trk-meta">
@@ -109,8 +83,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Seek bar -->
                     <div class="seek-row">
                         <span class="t-lbl" id="t-cur">0:00</span>
                         <div class="seek-track" id="seek-track">
@@ -121,8 +93,6 @@
                         </div>
                         <span class="t-lbl right" id="t-dur">0:00</span>
                     </div>
-
-                    <!-- Playback controls -->
                     <div class="ctrl-row">
                         <button id="btn-shuf" title="Shuffle">🔀</button>
                         <button id="btn-prev" title="Bài trước">⏮</button>
@@ -130,16 +100,12 @@
                         <button id="btn-next" title="Bài tiếp">⏭</button>
                         <button id="btn-rep" title="Lặp lại">🔁</button>
                     </div>
-
-                    <!-- Volume -->
                     <div class="vol-row">
                         <span class="vol-ic" id="vol-ic">🔈</span>
                         <input type="range" class="vol" id="vol-inp" min="0" max="100" value="80" />
                         <span class="vol-pct" id="vol-pct">80%</span>
                     </div>
                 </div>
-
-                <!-- Queue zone -->
                 <div class="queue-zone">
                     <div class="q-hdr">
                         <span class="q-hdr-title">Hàng đợi</span>
@@ -148,15 +114,12 @@
                     <ul id="q-list" class="q-list">
                         <li class="q-empty">Thêm bài hát để bắt đầu nghe cùng nhau 🎶</li>
                     </ul>
-
-                    <!-- Add track form -->
                     <div class="add-zone">
                         <div class="tabs">
                             <button class="tab-btn on" data-tab="yt">▶ YouTube</button>
                             <button class="tab-btn" data-tab="file">📁 File</button>
                             <button class="tab-btn" data-tab="sp">🎵 Spotify</button>
                         </div>
-
                         <div id="tab-yt" class="tab-pane on">
                             <div class="tab-row">
                                 <input class="inp" id="yt-inp" type="text" placeholder="https://youtube.com/watch?v=..."
@@ -164,7 +127,6 @@
                                 <button class="btn-add-track" id="btn-addyt">Thêm</button>
                             </div>
                         </div>
-
                         <div id="tab-file" class="tab-pane">
                             <div class="file-zone" id="file-zone">
                                 <input type="file" id="file-inp"
@@ -177,7 +139,6 @@
                                 Host.
                             </p>
                         </div>
-
                         <div id="tab-sp" class="tab-pane">
                             <div class="tab-row">
                                 <input class="inp" id="sp-inp" type="text"
@@ -192,8 +153,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- RIGHT: Chat -->
             <div class="panel">
                 <div class="panel-hdr">Trò chuyện</div>
                 <div class="chat-msgs" id="chat-msgs"></div>
@@ -205,19 +164,12 @@
             </div>
         </div>
     </div>
-
-    <!-- Hidden audio element (file playback + WebRTC stream) -->
     <audio id="aud" hidden></audio>
-
-    <!-- Toast -->
     <div class="toast" id="toast"></div>
-
-    <!-- Loading overlay -->
     <div class="load-ov" id="load-ov" hidden>
         <div class="spin"></div>
         <p class="load-lbl" id="load-lbl">Đang kết nối...</p>
     </div>
-
     <script src="js/01-utils.js"></script>
     <script src="js/02-state-protocol.js"></script>
     <script src="js/03-network.js"></script>
@@ -229,5 +181,4 @@
     <script src="js/09-room.js"></script>
     <script src="js/10-events.js"></script>
 </body>
-
 </html>

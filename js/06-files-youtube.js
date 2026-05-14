@@ -1,9 +1,3 @@
-// 06-files-youtube.js
-// Local file handling, WebRTC audio stream setup, and YouTube metadata/player logic.
-
-// ═══════════════════════════════════════════
-// §8  FILE HANDLING
-// ═══════════════════════════════════════════
 async function handleFile(file) {
     if (!S.isHost) {
         toast("Chỉ Host mới có thể tải file lên", "warn");
@@ -20,7 +14,6 @@ async function handleFile(file) {
         toast("Định dạng không hỗ trợ", "err");
         return;
     }
-
     showLoad(`Đang xử lý "${file.name.slice(0, 30)}..."`);
     try {
         const url = URL.createObjectURL(file);
@@ -32,21 +25,16 @@ async function handleFile(file) {
             a.onerror = () => rej(new Error("Không đọc được file"));
             setTimeout(() => rej(new Error("Timeout")), 10000);
         });
-
-        // AudioContext setup (once only)
         if (!S.ctx) {
             S.ctx = new (window.AudioContext || window.webkitAudioContext)();
         }
         if (S.ctx.state === "suspended") await S.ctx.resume();
-
         if (!S.asSrc) {
             S.asSrc = S.ctx.createMediaElementSource(a);
             S.asDst = S.ctx.createMediaStreamDestination();
             S.asSrc.connect(S.asDst);
             S.asSrc.connect(S.ctx.destination);
         }
-
-        // Call every connected guest with audio stream
         for (const [pid, c] of Object.entries(S.conns)) {
             if (!c?.open) continue;
             if (S.calls[pid]) {
@@ -59,13 +47,11 @@ async function handleFile(file) {
                 S.calls[pid] = cl;
             } catch (e) {}
         }
-
         const title = file.name.replace(/\.[^.]+$/, "").slice(0, 80);
         const track = { id: rid(), type: "file", title, addedBy: san(S.name, 20) };
         S.queue.push(track);
         bcast({ type: M.QUEUE, queue: S.queue });
         renderQueue();
-
         const idx = S.queue.length - 1;
         S.idx = idx;
         S.playing = true;
@@ -76,7 +62,6 @@ async function handleFile(file) {
         $("trk-title").textContent = title;
         $("trk-art").textContent = "📁";
         $("trk-sub").textContent = `Thêm bởi ${esc(san(S.name, 20))}`;
-
         hideLoad();
         toast(`▶ ${title}`, "ok");
     } catch (e) {
@@ -85,10 +70,6 @@ async function handleFile(file) {
         console.error(e);
     }
 }
-
-// ═══════════════════════════════════════════
-// §9  YOUTUBE PLAYER
-// ═══════════════════════════════════════════
 function initYT() {
     return new Promise((res) => {
         if (window.YT?.Player) {
@@ -109,7 +90,6 @@ function initYT() {
     });
 }
 function createYTPlayer(cb) {
-    // Ensure the target element exists
     let el = $("yt-el");
     if (!el) {
         el = document.createElement("div");
@@ -150,8 +130,6 @@ function createYTPlayer(cb) {
         },
     });
 }
-
-// Fetch YouTube title + thumbnail without API key
 async function fetchYTMeta(vid) {
     if (!vid) return;
     try {
