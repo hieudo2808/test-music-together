@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SyncBeat — Nghe nhạc cùng bạn bè</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{
+  --bg:#07070e;
+  --bg2:#0c0c18;
+  --s1:#111128;
+  --s2:#191935;
+  --s3:#23234a;
+  --s4:#2e2e5e;
+  --p:#8b5cf6;
+  --p2:#a78bfa;
+  --p3:#c4b5fd;
+  --cy:#06b6d4;
+  --cy2:#67e8f9;
+  --t:#ebebff;
+  --t2:#8888bb;
+  --t3:#44446a;
+  --ok:#34d399;
+  --err:#f87171;
+  --warn:#fbbf24;
+  --r:10px;
+  --r2:7px;
+  --border:rgba(139,92,246,.18);
+  --border2:rgba(255,255,255,.06);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);
+  color:var(--t);
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;
+  line-height:1.5;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% -5%,rgba(139,92,246,.13) 0%,transparent 65%),
+    radial-gradient(ellipse 50% 60% at 85% 105%,rgba(6,182,212,.09) 0%,transparent 65%);
+  pointer-events:none;
+  z-index:0;
+}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+[hidden]{display:none!important}
+
+/* ─── LANDING ─── */
+#scr-land{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:100vh;
+  padding:24px;
+  gap:48px;
+}
+.land-hero{text-align:center}
+.land-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:72px;height:72px;
+  background:linear-gradient(135deg,var(--p),var(--cy));
+  border-radius:20px;
+  font-size:32px;
+  margin-bottom:20px;
+  box-shadow:0 0 40px rgba(139,92,246,.35);
+  animation:float 3s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.land-hero h1{
+  font-family:'Syne',sans-serif;
+  font-size:52px;
+  font-weight:800;
+  background:linear-gradient(135deg,var(--p3),var(--p),var(--cy));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:-2px;
+  line-height:1;
+  margin-bottom:10px;
+}
+.land-hero p{color:var(--t2);font-size:16px;font-weight:300}
+.land-cards{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:12px;
+  align-items:stretch;
+  width:100%;
+  max-width:620px;
+}
+.l-card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:24px;
+  display:flex;flex-direction:column;
+  gap:12px;
+  backdrop-filter:blur(8px);
+}
+.l-card h2{
+  font-family:'Syne',sans-serif;
+  font-size:17px;font-weight:700;
+  margin-bottom:4px;
+}
+.l-divider{
+  display:flex;align-items:center;justify-content:center;
+  color:var(--t3);font-size:12px;writing-mode:vertical-lr;
+  user-select:none;padding:4px 0;
+}
+/* ─── INPUTS ─── */
+.inp{
+  background:var(--s2);
+  border:1px solid var(--border2);
+  border-radius:var(--r2);
+  color:var(--t);
+  padding:10px 13px;
+  font:14px 'DM Sans',sans-serif;
+  outline:none;
+  transition:border-color .18s,box-shadow .18s;
+  width:100%;
+}
+.inp:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(139,92,246,.15)}
+.inp::placeholder{color:var(--t3)}
+.inp.code-inp{
+  font:500 18px/1 'JetBrains Mono',monospace;
+  letter-spacing:5px;
+  text-align:center;
+  text-transform:uppercase;
+}
+/* ─── BUTTONS ─── */
+button{cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;border:none;outline:none;border-radius:var(--r2);transition:all .15s}
+.btn-primary{
+  background:linear-gradient(135deg,var(--p),var(--cy));
+  color:#fff;padding:11px;
+  font-weight:600;width:100%;
+  box-shadow:0 4px 20px rgba(139,92,246,.3);
+}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0);filter:brightness(.95)}
+.btn-sm{
+  background:var(--s2);color:var(--t2);
+  padding:5px 10px;
+  border:1px solid var(--border2);
+  font-size:13px;border-radius:6px;
+}
+.btn-sm:hover{background:var(--s3);color:var(--t)}
+.btn-icon{
+  background:none;color:var(--t3);
+  font-size:16px;padding:6px;
+  border-radius:6px;line-height:1;
+}
+.btn-icon:hover{background:var(--s2);color:var(--t2)}
+.btn-icon.on{color:var(--p2)}
+.btn-add-track{
+  background:var(--p);color:#fff;
+  padding:10px 16px;font-size:13px;font-weight:500;
+  white-space:nowrap;flex-shrink:0;
+}
+.btn-add-track:hover{background:var(--p2)}
+.btn-leave{
+  background:rgba(248,113,113,.1);
+  color:var(--err);
+  border:1px solid rgba(248,113,113,.2);
+  padding:6px 14px;border-radius:20px;font-size:13px;
+}
+.btn-leave:hover{background:rgba(248,113,113,.2)}
+
+/* ─── ROOM LAYOUT ─── */
+#scr-room{
+  position:relative;z-index:1;
+  display:grid;
+  grid-template-rows:50px 1fr;
+  height:100vh;
+  overflow:hidden;
+}
+/* Header */
+.room-hdr{
+  background:rgba(7,7,14,.85);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border2);
+  padding:0 16px;
+  display:flex;align-items:center;gap:12px;
+}
+.logo-sm{
+  font-family:'Syne',sans-serif;
+  font-size:18px;font-weight:800;
+  background:linear-gradient(135deg,var(--p2),var(--cy));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  flex-shrink:0;
+}
+.room-code-pill{
+  display:flex;align-items:center;gap:8px;
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:4px 6px 4px 14px;
+  font-size:13px;color:var(--t2);
+}
+.room-code-pill strong{
+  font-family:'JetBrains Mono',monospace;
+  font-size:15px;font-weight:500;
+  color:var(--p3);
+  letter-spacing:3px;
+}
+.host-pill{
+  background:rgba(139,92,246,.15);
+  border:1px solid rgba(139,92,246,.3);
+  border-radius:20px;padding:3px 12px;
+  font-size:11px;font-weight:500;color:var(--p3);
+}
+.status-dot{font-size:12px;color:var(--t3);margin-left:auto}
+/* Body */
+.room-body{
+  display:grid;
+  grid-template-columns:210px 1fr 250px;
+  overflow:hidden;
+}
+/* ─── PANELS ─── */
+.panel{
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  border-right:1px solid var(--border2);
+}
+.panel:last-child{border-right:none;border-left:1px solid var(--border2)}
+.panel-hdr{
+  padding:12px 14px;
+  font-size:10px;font-weight:600;
+  color:var(--t3);
+  text-transform:uppercase;letter-spacing:.8px;
+  border-bottom:1px solid var(--border2);
+  flex-shrink:0;display:flex;align-items:center;gap:6px;
+}
+.panel-body{flex:1;overflow-y:auto;padding:10px}
+/* Members */
+.mbr-item{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 8px;border-radius:var(--r2);
+  transition:background .15s;
+}
+.mbr-item:hover{background:var(--s2)}
+.mbr-av{
+  width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,var(--p),var(--cy));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:13px;flex-shrink:0;
+  font-family:'Syne',sans-serif;
+}
+.mbr-info{flex:1;min-width:0}
+.mbr-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mbr-role{font-size:10px;color:var(--p3)}
+/* Chat */
+.chat-msgs{
+  flex:1;overflow-y:auto;
+  padding:10px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.chat-msg{
+  padding:7px 10px;
+  border-radius:var(--r2);
+  background:var(--s1);
+}
+.chat-msg-top{display:flex;align-items:baseline;gap:6px;margin-bottom:2px}
+.chat-uname{font-size:11px;font-weight:600;color:var(--p3)}
+.chat-time{font-size:10px;color:var(--t3)}
+.chat-body{font-size:13px;word-break:break-word}
+.chat-sys{
+  text-align:center;font-size:11px;
+  color:var(--t3);padding:3px 8px;
+}
+.chat-input-row{
+  display:flex;gap:8px;
+  padding:10px 12px;
+  border-top:1px solid var(--border2);
+  flex-shrink:0;
+}
+.chat-input-row .inp{flex:1;padding:8px 11px;font-size:13px}
+.btn-send{
+  background:var(--p);color:#fff;
+  padding:8px 12px;border-radius:var(--r2);
+  font-size:15px;line-height:1;
+}
+.btn-send:hover{background:var(--p2)}
+
+/* ─── PLAYER COLUMN ─── */
+.player-col{
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  background:var(--bg2);
+}
+.player-zone{
+  flex-shrink:0;
+  padding:18px 20px 14px;
+  border-bottom:1px solid var(--border2);
+}
+/* YouTube */
+#yt-wrap{
+  border-radius:var(--r);overflow:hidden;
+  aspect-ratio:16/9;margin-bottom:16px;
+  display:none;
+  box-shadow:0 8px 40px rgba(0,0,0,.5);
+}
+#yt-wrap.show{display:block}
+/* Spotify */
+#sp-wrap{
+  display:none;border-radius:var(--r);overflow:hidden;
+  margin-bottom:16px;
+}
+#sp-wrap.show{display:block}
+/* Track info */
+.trk-row{
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:16px;
+}
+.trk-art{
+  width:52px;height:52px;border-radius:9px;
+  background:var(--s2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;overflow:hidden;
+}
+.trk-art img{width:100%;height:100%;object-fit:cover}
+.trk-meta{flex:1;min-width:0}
+.trk-title{
+  font-family:'Syne',sans-serif;
+  font-size:15px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.trk-sub{font-size:11px;color:var(--t2);margin-top:2px}
+/* Seek */
+.seek-row{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;
+}
+.t-lbl{
+  font-size:11px;font-family:'JetBrains Mono',monospace;
+  color:var(--t3);min-width:34px;
+}
+.t-lbl.right{text-align:right}
+.seek-track{
+  flex:1;position:relative;
+  height:3px;background:var(--s3);border-radius:2px;
+  cursor:pointer;
+  transition:height .15s;
+}
+.seek-track:hover,.seek-track.drag{height:5px}
+.seek-fill{
+  position:absolute;left:0;top:0;height:100%;
+  background:linear-gradient(90deg,var(--p),var(--cy));
+  border-radius:2px;pointer-events:none;
+  transition:width .08s linear;
+}
+.seek-thumb{
+  position:absolute;top:50%;
+  width:13px;height:13px;border-radius:50%;
+  background:#fff;
+  transform:translate(-50%,-50%) scale(0);
+  pointer-events:none;
+  transition:transform .15s;
+  box-shadow:0 0 6px rgba(0,0,0,.5);
+}
+.seek-track:hover .seek-thumb,
+.seek-track.drag .seek-thumb{transform:translate(-50%,-50%) scale(1)}
+.seek-inp{
+  position:absolute;
+  top:-10px;left:0;right:0;
+  height:calc(100% + 20px);
+  opacity:0;cursor:pointer;width:100%;
+}
+/* Controls */
+.ctrl-row{
+  display:flex;align-items:center;justify-content:center;
+  gap:6px;margin-bottom:12px;
+}
+.ctrl-row button{
+  background:none;color:var(--t2);
+  font-size:18px;padding:8px;
+  border-radius:50%;line-height:1;
+  transition:all .15s;
+}
+.ctrl-row button:hover{color:var(--t);background:var(--s2)}
+.ctrl-row button.on{color:var(--p2)}
+.play-main{
+  background:linear-gradient(135deg,var(--p),var(--cy)) !important;
+  color:#fff !important;
+  width:46px;height:46px;
+  border-radius:50% !important;
+  font-size:18px !important;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(139,92,246,.4);
+}
+.play-main:hover{filter:brightness(1.12);transform:scale(1.05) !important}
+/* Volume */
+.vol-row{display:flex;align-items:center;gap:8px}
+.vol-ic{color:var(--t3);font-size:14px}
+input[type=range].vol{
+  -webkit-appearance:none;flex:1;
+  height:3px;border-radius:2px;
+  background:var(--s3);outline:none;cursor:pointer;
+}
+input[type=range].vol::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:12px;height:12px;border-radius:50%;
+  background:var(--p2);cursor:pointer;
+}
+.vol-pct{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--t3);min-width:30px}
+
+/* ─── QUEUE COLUMN (inside player-col) ─── */
+.queue-zone{
+  flex:1;overflow:hidden;
+  display:flex;flex-direction:column;
+  padding:14px 16px 0;
+}
+.q-hdr{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;flex-shrink:0;
+}
+.q-hdr-title{
+  font-family:'Syne',sans-serif;
+  font-size:11px;font-weight:700;
+  color:var(--t3);text-transform:uppercase;letter-spacing:.8px;
+}
+.q-count{font-size:11px;color:var(--t3)}
+.q-list{
+  flex:1;overflow-y:auto;
+  display:flex;flex-direction:column;gap:2px;
+  padding-bottom:8px;
+}
+.q-item{
+  display:flex;align-items:center;gap:9px;
+  padding:7px 9px;border-radius:var(--r2);
+  cursor:pointer;transition:background .15s;
+  border:1px solid transparent;
+  list-style:none;
+}
+.q-item:hover{background:var(--s2)}
+.q-item.active{
+  background:rgba(139,92,246,.1);
+  border-color:rgba(139,92,246,.25);
+}
+.q-num{
+  font-size:11px;color:var(--t3);
+  min-width:18px;text-align:center;
+  font-family:'JetBrains Mono',monospace;
+}
+.q-item.active .q-num{display:none}
+.q-bars-wrap{
+  display:none;min-width:18px;
+  justify-content:center;
+}
+.q-item.active .q-bars-wrap{display:flex}
+.bars{
+  display:flex;gap:2px;align-items:flex-end;height:14px;
+}
+.bar{
+  width:3px;background:linear-gradient(to top,var(--p),var(--cy));
+  border-radius:1px;
+  animation:barUp .7s ease-in-out infinite alternate;
+}
+.bar:nth-child(2){animation-delay:.15s}
+.bar:nth-child(3){animation-delay:.3s}
+@keyframes barUp{from{height:3px}to{height:14px}}
+.bars.paused .bar{animation-play-state:paused}
+.q-thumb{
+  width:34px;height:34px;border-radius:6px;
+  background:var(--s2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;overflow:hidden;
+}
+.q-thumb img{width:100%;height:100%;object-fit:cover}
+.q-info{flex:1;min-width:0}
+.q-title{
+  font-size:13px;font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.q-by{font-size:10px;color:var(--t3)}
+.q-del{
+  background:none;color:var(--t3);
+  font-size:13px;padding:3px 5px;border-radius:5px;
+  opacity:0;transition:opacity .15s;
+}
+.q-item:hover .q-del{opacity:1}
+.q-del:hover{color:var(--err)!important;background:rgba(248,113,113,.1)}
+.q-empty{
+  text-align:center;color:var(--t3);
+  padding:28px 16px;font-size:13px;
+  list-style:none;
+}
+
+/* ─── ADD TRACK ─── */
+.add-zone{
+  flex-shrink:0;
+  border-top:1px solid var(--border2);
+  padding:12px 0 14px;
+}
+.tabs{display:flex;gap:3px;margin-bottom:10px}
+.tab-btn{
+  background:none;color:var(--t3);
+  padding:5px 11px;border-radius:6px;
+  font-size:12px;font-weight:500;
+}
+.tab-btn:hover{color:var(--t2);background:var(--s2)}
+.tab-btn.on{background:var(--s2);color:var(--p3)}
+.tab-pane{display:none}
+.tab-pane.on{display:flex;flex-direction:column;gap:8px}
+.tab-row{display:flex;gap:8px}
+.tab-row .inp{flex:1}
+.tab-note{font-size:11px;color:var(--t3);line-height:1.5}
+.file-zone{
+  width:100%;
+  border:2px dashed var(--border2);
+  border-radius:var(--r2);
+  padding:18px;
+  text-align:center;
+  cursor:pointer;position:relative;
+  transition:all .2s;
+}
+.file-zone:hover,.file-zone.drag{
+  border-color:var(--p);
+  background:rgba(139,92,246,.05);
+}
+.file-zone input{
+  position:absolute;inset:0;
+  opacity:0;cursor:pointer;width:100%;height:100%;
+}
+.file-zone p{font-size:13px;color:var(--t2);pointer-events:none}
+.file-zone small{font-size:11px;color:var(--t3);pointer-events:none}
+
+/* ─── TOAST ─── */
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(12px);
+  background:var(--s2);
+  border:1px solid var(--border2);
+  border-radius:20px;
+  padding:9px 20px;font-size:13px;
+  z-index:9999;opacity:0;
+  transition:all .25s;pointer-events:none;
+  white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:rgba(52,211,153,.35);color:var(--ok)}
+.toast.err{border-color:rgba(248,113,113,.35);color:var(--err)}
+.toast.info{color:var(--t)}
+.toast.warn{border-color:rgba(251,191,36,.35);color:var(--warn)}
+/* ─── LOADING ─── */
+.load-ov{
+  position:fixed;inset:0;
+  background:rgba(7,7,14,.82);
+  backdrop-filter:blur(6px);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:16px;z-index:9998;
+}
+.spin{
+  width:36px;height:36px;
+  border:3px solid var(--s3);
+  border-top-color:var(--p);
+  border-radius:50%;
+  animation:spin .75s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-lbl{color:var(--t2);font-size:14px}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:860px){
+  .room-body{grid-template-columns:1fr 220px}
+  .panel:first-child{display:none}
+}
+@media(max-width:600px){
+  .land-cards{grid-template-columns:1fr;grid-template-rows:auto auto auto}
+  .l-divider{writing-mode:horizontal-tb;padding:0}
+  .room-body{grid-template-columns:1fr}
+  .panel:last-child{display:none}
+  .land-hero h1{font-size:38px}
+}
+
+/* connection status colors */
+.st-ok{color:var(--ok)}
+.st-warn{color:var(--warn)}
+.st-err{color:var(--err)}
+</style>
+</head>
+<body>
+
+<!-- ╔══════════════════════╗ -->
+<!-- ║    LANDING SCREEN   ║ -->
+<!-- ╚══════════════════════╝ -->
+<div id="scr-land">
+  <div class="land-hero">
+    <div class="land-icon">🎵</div>
+    <h1>SyncBeat</h1>
+    <p>Nghe nhạc cùng bạn bè — đồng bộ từng nhịp</p>
+  </div>
+
+  <div class="land-cards">
+    <!-- Tạo phòng -->
+    <div class="l-card">
+      <h2>🎧 Tạo Phòng</h2>
+      <input class="inp" id="l-cname" type="text" placeholder="Tên của bạn" maxlength="20" autocomplete="off"/>
+      <button class="btn-primary" id="l-bcreate">Tạo Phòng Mới</button>
+    </div>
+
+    <div class="l-divider">— hoặc —</div>
+
+    <!-- Tham gia -->
+    <div class="l-card">
+      <h2>🚀 Tham Gia</h2>
+      <input class="inp" id="l-jname" type="text" placeholder="Tên của bạn" maxlength="20" autocomplete="off"/>
+      <input class="inp code-inp" id="l-jcode" type="text" placeholder="XXXXXX" maxlength="6" autocomplete="off"/>
+      <button class="btn-primary" id="l-bjoin">Tham Gia Phòng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════╗ -->
+<!-- ║     ROOM SCREEN     ║ -->
+<!-- ╚══════════════════════╝ -->
+<div id="scr-room" hidden>
+
+  <!-- Header -->
+  <header class="room-hdr">
+    <span class="logo-sm">SyncBeat</span>
+    <div class="room-code-pill">
+      Phòng&nbsp;<strong id="hdr-code">------</strong>
+      <button class="btn-icon" id="btn-copy" title="Copy mã phòng">📋</button>
+      <button class="btn-icon" id="btn-share" title="Copy link mời">🔗</button>
+    </div>
+    <span class="host-pill" id="hdr-host" hidden>👑 Host</span>
+    <span class="status-dot" id="hdr-status">🟢 Đã kết nối</span>
+    <button class="btn-leave" id="btn-leave">Rời Phòng</button>
+  </header>
+
+  <!-- Body -->
+  <div class="room-body">
+
+    <!-- LEFT: Members -->
+    <div class="panel">
+      <div class="panel-hdr">Thành viên <span id="mbr-cnt">(0)</span></div>
+      <div class="panel-body">
+        <ul id="mbr-list" style="list-style:none;display:flex;flex-direction:column;gap:3px"></ul>
+      </div>
+    </div>
+
+    <!-- CENTER: Player + Queue -->
+    <div class="player-col">
+
+      <!-- Player zone -->
+      <div class="player-zone">
+
+        <!-- YouTube embed container -->
+        <div id="yt-wrap">
+          <div id="yt-el"></div>
+        </div>
+
+        <!-- Spotify embed container -->
+        <div id="sp-wrap"></div>
+
+        <!-- Track info -->
+        <div class="trk-row">
+          <div class="trk-art" id="trk-art">🎵</div>
+          <div class="trk-meta">
+            <div class="trk-title" id="trk-title">Chưa có bài hát</div>
+            <div class="trk-sub" id="trk-sub">Thêm bài hát vào hàng đợi để bắt đầu</div>
+          </div>
+        </div>
+
+        <!-- Seek bar -->
+        <div class="seek-row">
+          <span class="t-lbl" id="t-cur">0:00</span>
+          <div class="seek-track" id="seek-track">
+            <div class="seek-fill" id="seek-fill"></div>
+            <div class="seek-thumb" id="seek-thumb"></div>
+            <input type="range" class="seek-inp" id="seek-inp" min="0" max="100000" value="0" step="1"/>
+          </div>
+          <span class="t-lbl right" id="t-dur">0:00</span>
+        </div>
+
+        <!-- Playback controls -->
+        <div class="ctrl-row">
+          <button id="btn-shuf" title="Shuffle">🔀</button>
+          <button id="btn-prev" title="Bài trước">⏮</button>
+          <button id="btn-pp" class="play-main" title="Play / Pause">▶</button>
+          <button id="btn-next" title="Bài tiếp">⏭</button>
+          <button id="btn-rep" title="Lặp lại">🔁</button>
+        </div>
+
+        <!-- Volume -->
+        <div class="vol-row">
+          <span class="vol-ic" id="vol-ic">🔈</span>
+          <input type="range" class="vol" id="vol-inp" min="0" max="100" value="80"/>
+          <span class="vol-pct" id="vol-pct">80%</span>
+        </div>
+      </div>
+
+      <!-- Queue zone -->
+      <div class="queue-zone">
+        <div class="q-hdr">
+          <span class="q-hdr-title">Hàng đợi</span>
+          <span class="q-count" id="q-count">0 bài</span>
+        </div>
+        <ul id="q-list" class="q-list">
+          <li class="q-empty">Thêm bài hát để bắt đầu nghe cùng nhau 🎶</li>
+        </ul>
+
+        <!-- Add track form -->
+        <div class="add-zone">
+          <div class="tabs">
+            <button class="tab-btn on" data-tab="yt">▶ YouTube</button>
+            <button class="tab-btn" data-tab="file">📁 File</button>
+            <button class="tab-btn" data-tab="sp">🎵 Spotify</button>
+          </div>
+
+          <div id="tab-yt" class="tab-pane on">
+            <div class="tab-row">
+              <input class="inp" id="yt-inp" type="text" placeholder="https://youtube.com/watch?v=..." autocomplete="off"/>
+              <button class="btn-add-track" id="btn-addyt">Thêm</button>
+            </div>
+          </div>
+
+          <div id="tab-file" class="tab-pane">
+            <div class="file-zone" id="file-zone">
+              <input type="file" id="file-inp" accept="audio/*,.mp3,.wav,.ogg,.flac,.aac,.m4a,.opus,.webm"/>
+              <p>📁 Kéo thả hoặc click để chọn file nhạc</p>
+              <small>MP3, WAV, OGG, FLAC, AAC, M4A — tối đa 100MB</small>
+            </div>
+            <p class="tab-note" id="file-only-note" hidden>⚠️ Chỉ Host mới có thể tải file. Khách sẽ nghe qua stream từ Host.</p>
+          </div>
+
+          <div id="tab-sp" class="tab-pane">
+            <div class="tab-row">
+              <input class="inp" id="sp-inp" type="text" placeholder="https://open.spotify.com/track/..." autocomplete="off"/>
+              <button class="btn-add-track" id="btn-addsp">Thêm</button>
+            </div>
+            <p class="tab-note">⚠️ Spotify embed chỉ nghe được 30 giây preview — không đồng bộ hoàn hảo với nhóm.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Chat -->
+    <div class="panel">
+      <div class="panel-hdr">Trò chuyện</div>
+      <div class="chat-msgs" id="chat-msgs"></div>
+      <div class="chat-input-row">
+        <input class="inp" id="chat-inp" type="text" placeholder="Nhắn tin..." maxlength="200" autocomplete="off"/>
+        <button class="btn-send" id="btn-send">↑</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Hidden audio element (file playback + WebRTC stream) -->
+<audio id="aud" hidden></audio>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Loading overlay -->
+<div class="load-ov" id="load-ov" hidden>
+  <div class="spin"></div>
+  <p class="load-lbl" id="load-lbl">Đang kết nối...</p>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// §1  UTILITIES
+// ═══════════════════════════════════════════
+const $=id=>document.getElementById(id);
+
+// XSS-safe escape
+function esc(s){
+  const d=document.createElement('div');
+  d.appendChild(document.createTextNode(String(s??'')));
+  return d.innerHTML;
+}
+
+// Sanitize user input
+function san(s,max=200){return String(s??'').trim().slice(0,max)}
+
+// Format seconds → m:ss
+function fmt(s){
+  if(!Number.isFinite(s)||s<0)return'0:00';
+  s=Math.floor(s);
+  return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+// Random ID
+function rid(n=8){return Math.random().toString(36).slice(2,2+n)}
+
+// Room code (6 chars, no ambiguous letters)
+function genCode(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('');
+}
+
+// Parse YouTube URL → videoId or null
+function parseYT(url){
+  if(!url||typeof url!=='string')return null;
+  const m=url.match(/(?:[?&]v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+  return m?m[1]:null;
+}
+
+// Parse Spotify URL → {type,id} or null
+function parseSP(url){
+  const m=url?.match(/open\.spotify\.com\/(track|playlist|album|episode)\/([A-Za-z0-9]+)/);
+  return m?{type:m[1],id:m[2]}:null;
+}
+
+// Validate & clean a track object
+function cleanTrack(t){
+  if(!t||typeof t!=='object')return null;
+  if(!['youtube','file','spotify'].includes(t.type))return null;
+  if(t.type==='youtube'){
+    if(!/^[a-zA-Z0-9_-]{11}$/.test(t.videoId))return null;
+  }
+  if(t.type==='spotify'){
+    if(!/^[A-Za-z0-9]+$/.test(t.spotifyId))return null;
+    if(!['track','playlist','album','episode'].includes(t.spotifyType))return null;
+  }
+  if(t.type==='file'&&!t.title)return null;
+  return{
+    id:san(t.id||rid(),20),
+    type:t.type,
+    title:san(t.title||'Unknown',100),
+    videoId:t.videoId||null,
+    spotifyId:t.spotifyId||null,
+    spotifyType:t.spotifyType||null,
+    thumb:typeof t.thumb==='string'?t.thumb:null,
+    addedBy:san(t.addedBy||'?',20),
+  };
+}
+
+// Rate limiter factory
+function mkRL(max,winMs){
+  const ts=[];
+  return()=>{
+    const now=Date.now();
+    const ok=ts.filter(t=>now-t<winMs);
+    ts.length=0;ts.push(...ok);
+    if(ts.length>=max)return false;
+    ts.push(now);return true;
+  };
+}
+
+// Toast
+let toastTimer;
+function toast(msg,type='info',dur=3200){
+  const el=$('toast');
+  el.textContent=msg;
+  el.className=`toast ${type} show`;
+  el.hidden=false;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{
+    el.classList.remove('show');
+    setTimeout(()=>el.hidden=true,280);
+  },dur);
+}
+
+function showLoad(t='Đang tải...'){$('load-lbl').textContent=t;$('load-ov').hidden=false}
+function hideLoad(){$('load-ov').hidden=true}
+
+// ═══════════════════════════════════════════
+// §2  STATE
+// ═══════════════════════════════════════════
+const S={
+  // identity
+  uid:rid(),
+  name:'',
+  room:'',
+  isHost:false,
+  // network
+  peer:null,
+  conns:{},   // peerId→DataConnection
+  calls:{},   // peerId→MediaConnection
+  hostPid:'', // guest's host peer ID
+  // room state (synced)
+  queue:[],
+  idx:-1,
+  playing:false,
+  curT:0,
+  dur:0,
+  shuffle:false,
+  repeat:false,
+  members:{}, // uid→{name,peerId}
+  // player
+  yt:null,ytOK:false,
+  aud:$('aud'),
+  ctx:null,   // AudioContext
+  asSrc:null, // MediaElementAudioSourceNode
+  asDst:null, // MediaStreamAudioDestinationNode
+  // ui
+  seekDrag:false,
+  vol:0.8,
+  // pending
+  pendingLoad:null, // track to load once yt is ready
+};
+
+// Rate limiters
+const RL={
+  add: mkRL(5,10000),
+  ctrl:mkRL(30,5000),
+  chat:mkRL(10,5000),
+};
+
+// ═══════════════════════════════════════════
+// §3  MESSAGE PROTOCOL
+// ═══════════════════════════════════════════
+// Types
+const M={
+  SYNC:'sync',
+  PLAY:'play',PAUSE:'pause',SEEK:'seek',LOAD:'load',
+  QUEUE:'queue',PROG:'prog',
+  JOIN:'join',MEMBERS:'members',CHAT:'chat',
+  // Requests (guest→host)
+  R_PLAY:'r_play',R_PAUSE:'r_pause',R_SEEK:'r_seek',
+  R_LOAD:'r_load',R_ADD:'r_add',R_RM:'r_rm',
+};
+const ALL_M=new Set(Object.values(M));
+
+function valid(msg){
+  return msg&&typeof msg==='object'&&ALL_M.has(msg.type);
+}
+
+// ═══════════════════════════════════════════
+// §4  NETWORKING
+// ═══════════════════════════════════════════
+function initPeer(specId){
+  return new Promise((res,rej)=>{
+    const cfg={config:{iceServers:[
+      {urls:'stun:stun.l.google.com:19302'},
+      {urls:'stun:stun1.l.google.com:19302'},
+      {urls:'stun:global.stun.twilio.com:3478'},
+    ]}};
+    const p=specId?new Peer(specId,cfg):new Peer(cfg);
+    p.on('open',id=>{S.peer=p;res(id)});
+    p.on('error',e=>{
+      if(e.type==='unavailable-id')rej(new Error('Mã phòng đang được sử dụng'));
+      else rej(e);
+    });
+    p.on('connection',onConn);
+    p.on('call',onCall);
+    p.on('disconnected',()=>{setStatus('🟡 Đang kết nối lại…','warn');p.reconnect()});
+    p.on('close',()=>setStatus('🔴 Đã đóng kết nối','err'));
+    setTimeout(()=>rej(new Error('Timeout')),15000);
+  });
+}
+
+function onConn(conn){
+  conn.on('open',()=>{
+    S.conns[conn.peer]=conn;
+    conn.on('data',d=>onMsg(d,conn.peer));
+    conn.on('close',()=>peerGone(conn.peer));
+    conn.on('error',e=>console.warn('conn err',e));
+  });
+}
+
+// Guest receives host's audio stream
+function onCall(call){
+  call.answer();
+  call.on('stream',stream=>{
+    const a=S.aud;
+    a.srcObject=stream;
+    a.volume=S.vol;
+    a.play().catch(()=>toast('Nhấn ▶ để bắt đầu nghe','info'));
+  });
+  call.on('close',()=>{if(S.aud.srcObject)S.aud.srcObject=null});
+}
+
+function peerGone(pid){
+  delete S.conns[pid];
+  if(S.calls[pid]){try{S.calls[pid].close()}catch(e){}delete S.calls[pid]}
+  let name='';
+  for(const[uid,m]of Object.entries(S.members)){
+    if(m.peerId===pid){name=m.name;delete S.members[uid];break}
+  }
+  if(name){sysChat(`${name} đã rời phòng`);renderMembers()}
+  if(S.isHost)bcast({type:M.MEMBERS,members:S.members});
+  if(!S.isHost&&pid===S.hostPid)toast('Host đã rời phòng!','err');
+}
+
+async function connectHost(hostPid){
+  return new Promise((res,rej)=>{
+    const c=S.peer.connect(hostPid,{reliable:true,serialization:'json'});
+    c.on('open',()=>{
+      S.conns[hostPid]=c;S.hostPid=hostPid;
+      c.on('data',d=>onMsg(d,hostPid));
+      c.on('close',()=>peerGone(hostPid));
+      // announce
+      c.send({type:M.JOIN,uid:S.uid,name:san(S.name,20),peerId:S.peer.id});
+      res();
+    });
+    c.on('error',rej);
+    setTimeout(()=>rej(new Error('Timeout kết nối')),13000);
+  });
+}
+
+function send(pid,msg){const c=S.conns[pid];if(c?.open)c.send(msg)}
+function bcast(msg,skip){
+  for(const[pid,c]of Object.entries(S.conns))
+    if(pid!==skip&&c?.open)c.send(msg);
+}
+// Send request to host (or process directly if we are host)
+function toHost(msg){
+  if(S.isHost)onMsg({...msg,from:S.uid},'__self__');
+  else send(S.hostPid,{...msg,from:S.uid});
+}
+// Broadcast to all peers AND apply locally
+function bcastSelf(msg){bcast(msg);onMsg(msg,'__self__')}
+
+// ═══════════════════════════════════════════
+// §5  MESSAGE HANDLER
+// ═══════════════════════════════════════════
+function onMsg(msg,from){
+  if(!valid(msg))return;
+
+  // ── HOST handles requests ──
+  if(S.isHost){
+    switch(msg.type){
+      case M.JOIN:{
+        const uid=san(msg.uid||'',20);
+        const name=san(msg.name||'Ẩn danh',20);
+        if(!uid||from==='__self__')break;
+        S.members[uid]={name,peerId:from};
+        renderMembers();sysChat(`${name} đã tham gia 🎉`);
+        bcast({type:M.MEMBERS,members:S.members},from);
+        // If currently streaming audio file, call new peer
+        if(S.asDst&&from!=='__self__'){
+          try{const cl=S.peer.call(from,S.asDst.stream);S.calls[from]=cl}catch(e){}
+        }
+        // Full sync
+        send(from,{
+          type:M.SYNC,
+          queue:S.queue,idx:S.idx,playing:S.playing,
+          curT:getT(),members:S.members,
+        });
+        break;
+      }
+      case M.R_PLAY:  if(RL.ctrl())hPlay();break;
+      case M.R_PAUSE: if(RL.ctrl())hPause();break;
+      case M.R_SEEK:
+        if(RL.ctrl()&&typeof msg.t==='number'&&msg.t>=0&&msg.t<=86400)hSeek(msg.t);
+        break;
+      case M.R_LOAD:
+        if(RL.ctrl()&&typeof msg.idx==='number'&&msg.idx>=0&&msg.idx<S.queue.length)hLoad(msg.idx);
+        break;
+      case M.R_ADD:{
+        if(!RL.add()){if(from!=='__self__')send(from,{type:'err',msg:'Thêm quá nhanh!'});break}
+        const t=cleanTrack(msg.track);if(!t)break;
+        S.queue.push(t);
+        bcastSelf({type:M.QUEUE,queue:S.queue});
+        if(S.idx===-1)hLoad(0);
+        if(t.type==='youtube')fetchYTMeta(t.videoId);
+        break;
+      }
+      case M.R_RM:{
+        const i=msg.idx;
+        if(typeof i!=='number'||i<0||i>=S.queue.length)break;
+        S.queue.splice(i,1);
+        if(S.idx>=S.queue.length)S.idx=Math.max(0,S.queue.length-1);
+        bcastSelf({type:M.QUEUE,queue:S.queue});
+        break;
+      }
+      case M.CHAT:{
+        if(!RL.chat())break;
+        const cm={type:M.CHAT,from:san(msg.from||S.uid,20),
+          name:san(msg.name||'?',20),text:san(msg.text||'',200),t:Date.now()};
+        if(!cm.text)break;
+        bcastSelf(cm);
+        break;
+      }
+    }
+  }
+
+  // ── ALL clients handle events ──
+  switch(msg.type){
+    case M.SYNC:
+      S.queue=(Array.isArray(msg.queue)?msg.queue:[]).map(cleanTrack).filter(Boolean);
+      S.idx=typeof msg.idx==='number'?msg.idx:-1;
+      S.members=msg.members||{};
+      renderMembers();renderQueue();
+      if(S.idx>=0&&S.queue[S.idx])applyLoad(S.idx,msg.curT||0,msg.playing);
+      break;
+    case M.QUEUE:
+      S.queue=(Array.isArray(msg.queue)?msg.queue:[]).map(cleanTrack).filter(Boolean);
+      renderQueue();break;
+    case M.MEMBERS:
+      S.members=msg.members||{};renderMembers();break;
+    case M.PLAY:
+      S.playing=true;applyPlay(msg.t||0);renderCtrl();break;
+    case M.PAUSE:
+      S.playing=false;applyPause(msg.t||0);renderCtrl();break;
+    case M.SEEK:
+      applySeek(msg.t||0);break;
+    case M.LOAD:
+      S.idx=msg.idx;applyLoad(msg.idx,msg.st||0,msg.play);break;
+    case M.PROG:
+      if(!S.isHost){S.curT=msg.t||0;S.dur=msg.dur||0;if(!S.seekDrag)renderSeek()}
+      break;
+    case M.CHAT:
+      renderChat(msg);break;
+  }
+}
+
+// ═══════════════════════════════════════════
+// §6  HOST PLAYBACK ACTIONS
+// ═══════════════════════════════════════════
+function getT(){
+  const tr=S.queue[S.idx];if(!tr)return 0;
+  if(tr.type==='youtube'&&S.yt){try{return S.yt.getCurrentTime()||0}catch(e){return 0}}
+  if(!S.aud.srcObject)return S.aud.currentTime||0;
+  return S.curT;
+}
+function getDur(){
+  const tr=S.queue[S.idx];if(!tr)return 0;
+  if(tr.type==='youtube'&&S.yt){try{return S.yt.getDuration()||0}catch(e){return 0}}
+  return isFinite(S.aud.duration)?S.aud.duration:0;
+}
+
+function hPlay(){
+  S.playing=true;
+  const tr=S.queue[S.idx];if(!tr)return;
+  if(tr.type==='youtube')S.yt?.playVideo();
+  else if(!S.aud.srcObject)S.aud.play().catch(()=>{});
+  bcastSelf({type:M.PLAY,t:getT()});
+}
+function hPause(){
+  S.playing=false;
+  const tr=S.queue[S.idx];
+  if(tr?.type==='youtube')S.yt?.pauseVideo();
+  else S.aud.pause();
+  bcastSelf({type:M.PAUSE,t:getT()});
+}
+function hSeek(t){
+  const tr=S.queue[S.idx];if(!tr)return;
+  if(tr.type==='youtube')S.yt?.seekTo(t,true);
+  else if(!S.aud.srcObject)S.aud.currentTime=t;
+  bcastSelf({type:M.SEEK,t});
+}
+function hLoad(idx,st=0,play=true){
+  if(idx<0||idx>=S.queue.length)return;
+  S.idx=idx;S.playing=play;
+  stopPlayer();
+  bcastSelf({type:M.LOAD,idx,st,play});
+}
+function stopPlayer(){
+  if(S.yt){try{S.yt.stopVideo()}catch(e){}}
+  if(!S.aud.srcObject){S.aud.pause();S.aud.removeAttribute('src')}
+}
+
+function playNext(){
+  if(!S.isHost||!S.queue.length)return;
+  let n;
+  if(S.shuffle)n=Math.floor(Math.random()*S.queue.length);
+  else if(S.repeat)n=S.idx;
+  else{n=S.idx+1;if(n>=S.queue.length){S.playing=false;renderCtrl();return}}
+  hLoad(n,0,true);
+}
+function playPrev(){
+  if(!S.isHost)return;
+  if(getT()>3){hSeek(0);return}
+  hLoad(Math.max(0,S.idx-1),0,true);
+}
+
+// ═══════════════════════════════════════════
+// §7  CLIENT APPLY EVENTS
+// ═══════════════════════════════════════════
+function applyPlay(t){
+  S.playing=true;
+  const tr=S.queue[S.idx];if(!tr)return;
+  if(tr.type==='youtube'&&S.yt){
+    try{S.yt.seekTo(t+0.15,true);S.yt.playVideo()}catch(e){}
+  }
+  if(!S.isHost&&tr.type==='file'&&S.aud.srcObject)
+    S.aud.play().catch(()=>toast('Nhấn ▶ để phát nhạc','info'));
+  renderCtrl();
+}
+function applyPause(t){
+  S.playing=false;
+  const tr=S.queue[S.idx];
+  if(tr?.type==='youtube'&&S.yt){try{S.yt.seekTo(t,true);S.yt.pauseVideo()}catch(e){}}
+  if(!S.isHost&&S.aud.srcObject)S.aud.pause();
+  renderCtrl();
+}
+function applySeek(t){
+  const tr=S.queue[S.idx];
+  if(tr?.type==='youtube'&&S.yt){try{S.yt.seekTo(t,true)}catch(e){}}
+  S.curT=t;if(!S.seekDrag)renderSeek();
+}
+
+function applyLoad(idx,st,play){
+  const tr=S.queue[idx];if(!tr)return;
+  S.idx=idx;S.playing=!!play;
+
+  const ytW=$('yt-wrap'),spW=$('sp-wrap');
+  ytW.classList.remove('show');ytW.style.display='none';
+  spW.classList.remove('show');spW.style.display='none';
+
+  $('trk-title').textContent=tr.title;
+  $('trk-sub').textContent=`Thêm bởi ${tr.addedBy}`;
+  const art=$('trk-art');
+
+  if(tr.type==='youtube'){
+    ytW.style.display='block';setTimeout(()=>ytW.classList.add('show'),10);
+    art.innerHTML=tr.thumb?`<img src="${esc(tr.thumb)}" alt="" loading="lazy">`:'▶️';
+    if(S.ytOK&&S.yt){
+      // Check if YT player element still exists in DOM
+      try{
+        S.yt.loadVideoById({videoId:tr.videoId,startSeconds:st});
+        if(!play)setTimeout(()=>S.yt.pauseVideo(),800);
+      }catch(e){}
+    } else {
+      S.pendingLoad={tr,st,play};
+    }
+  } else if(tr.type==='spotify'){
+    spW.style.display='block';setTimeout(()=>spW.classList.add('show'),10);
+    art.textContent='🎵';
+    spW.innerHTML=`<iframe
+      src="https://open.spotify.com/embed/${esc(tr.spotifyType)}/${esc(tr.spotifyId)}?utm_source=generator&theme=0"
+      width="100%" height="152" frameborder="0"
+      allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture"
+      style="border-radius:10px"></iframe>`;
+  } else {
+    // file — host plays locally, guests hear stream
+    art.textContent='📁';
+    if(S.isHost){
+      if(st>0&&!S.aud.srcObject)S.aud.currentTime=st;
+      if(play&&!S.aud.srcObject)S.aud.play().catch(()=>{});
+    }
+  }
+  renderCtrl();renderQueue();
+}
+
+// ═══════════════════════════════════════════
+// §8  FILE HANDLING
+// ═══════════════════════════════════════════
+async function handleFile(file){
+  if(!S.isHost){toast('Chỉ Host mới có thể tải file lên','warn');return}
+  if(file.size>100*1024*1024){toast('File quá lớn — tối đa 100MB','err');return}
+  const okType=/^audio\/|^video\/mp4/.test(file.type)||
+    /\.(mp3|wav|ogg|flac|aac|m4a|opus|webm)$/i.test(file.name);
+  if(!okType){toast('Định dạng không hỗ trợ','err');return}
+
+  showLoad(`Đang xử lý "${file.name.slice(0,30)}..."`)
+  try{
+    const url=URL.createObjectURL(file);
+    const a=S.aud;
+    a.srcObject=null;
+    a.src=url;
+    await new Promise((res,rej)=>{
+      a.onloadedmetadata=res;
+      a.onerror=()=>rej(new Error('Không đọc được file'));
+      setTimeout(()=>rej(new Error('Timeout')),10000);
+    });
+
+    // AudioContext setup (once only)
+    if(!S.ctx){
+      S.ctx=new(window.AudioContext||window.webkitAudioContext)();
+    }
+    if(S.ctx.state==='suspended')await S.ctx.resume();
+
+    if(!S.asSrc){
+      S.asSrc=S.ctx.createMediaElementSource(a);
+      S.asDst=S.ctx.createMediaStreamDestination();
+      S.asSrc.connect(S.asDst);
+      S.asSrc.connect(S.ctx.destination);
+    }
+
+    // Call every connected guest with audio stream
+    for(const[pid,c]of Object.entries(S.conns)){
+      if(!c?.open)continue;
+      if(S.calls[pid]){try{S.calls[pid].close()}catch(e){}}
+      try{const cl=S.peer.call(pid,S.asDst.stream);S.calls[pid]=cl}catch(e){}
+    }
+
+    const title=file.name.replace(/\.[^.]+$/,'').slice(0,80);
+    const track={id:rid(),type:'file',title,addedBy:san(S.name,20)};
+    S.queue.push(track);
+    bcast({type:M.QUEUE,queue:S.queue});
+    renderQueue();
+
+    const idx=S.queue.length-1;
+    S.idx=idx;S.playing=true;
+    a.volume=S.vol;
+    a.onended=playNext;
+    await a.play();
+    bcastSelf({type:M.LOAD,idx,st:0,play:true});
+    $('trk-title').textContent=title;
+    $('trk-art').textContent='📁';
+    $('trk-sub').textContent=`Thêm bởi ${esc(san(S.name,20))}`;
+
+    hideLoad();
+    toast(`▶ ${title}`,'ok');
+  }catch(e){
+    hideLoad();
+    toast('Lỗi: '+e.message,'err');
+    console.error(e);
+  }
+}
+
+// ═══════════════════════════════════════════
+// §9  YOUTUBE PLAYER
+// ═══════════════════════════════════════════
+function initYT(){
+  return new Promise(res=>{
+    if(window.YT?.Player){createYTPlayer(res);return}
+    const prev=window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady=()=>{prev?.();createYTPlayer(res)};
+    if(!$('_ytscript')){
+      const s=document.createElement('script');
+      s.id='_ytscript';s.src='https://www.youtube.com/iframe_api';
+      document.head.appendChild(s);
+    }
+  });
+}
+function createYTPlayer(cb){
+  // Ensure the target element exists
+  let el=$('yt-el');
+  if(!el){el=document.createElement('div');el.id='yt-el';$('yt-wrap').appendChild(el)}
+  S.yt=new YT.Player('yt-el',{
+    width:'100%',height:'100%',
+    playerVars:{autoplay:0,controls:0,disablekb:1,modestbranding:1,rel:0,fs:1},
+    events:{
+      onReady:()=>{
+        S.ytOK=true;
+        if(S.pendingLoad){
+          const{tr,st,play}=S.pendingLoad;S.pendingLoad=null;
+          try{
+            S.yt.loadVideoById({videoId:tr.videoId,startSeconds:st});
+            if(!play)setTimeout(()=>S.yt.pauseVideo(),800);
+          }catch(e){}
+        }
+        cb();
+      },
+      onStateChange:e=>{
+        if(!S.isHost)return;
+        if(e.data===YT.PlayerState.ENDED)playNext();
+        if(e.data===YT.PlayerState.PLAYING){S.playing=true;renderCtrl()}
+        if(e.data===YT.PlayerState.PAUSED){S.playing=false;renderCtrl()}
+      },
+      onError:()=>toast('YouTube: video này không thể phát (có thể bị chặn embed)','warn'),
+    }
+  });
+}
+
+// Fetch YouTube title + thumbnail without API key
+async function fetchYTMeta(vid){
+  if(!vid)return;
+  try{
+    const r=await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${vid}&format=json`);
+    if(!r.ok)return;
+    const d=await r.json();
+    const title=san(d.title||'',100);
+    const thumb=`https://img.youtube.com/vi/${vid}/mqdefault.jpg`;
+    const i=S.queue.findIndex(t=>t.videoId===vid);
+    if(i>=0&&S.isHost){
+      S.queue[i].title=title;
+      S.queue[i].thumb=thumb;
+      bcastSelf({type:M.QUEUE,queue:S.queue});
+      if(S.idx===i){
+        $('trk-title').textContent=title;
+        $('trk-art').innerHTML=`<img src="${esc(thumb)}" alt="" loading="lazy">`;
+      }
+    }
+  }catch(e){}
+}
+
+// ═══════════════════════════════════════════
+// §10  PROGRESS & SEEK BAR
+// ═══════════════════════════════════════════
+setInterval(()=>{
+  // Host broadcasts progress
+  if(S.isHost&&S.playing&&S.idx>=0){
+    const t=getT(),dur=getDur();
+    S.curT=t;S.dur=dur;
+    bcast({type:M.PROG,t,dur});
+  }
+  if(!S.seekDrag)renderSeek();
+},500);
+
+function renderSeek(){
+  let t=S.curT,dur=S.dur;
+  if(S.isHost){t=getT();dur=getDur();S.curT=t;S.dur=dur}
+  const pct=dur>0?t/dur:0;
+  $('t-cur').textContent=fmt(t);
+  $('t-dur').textContent=fmt(dur);
+  if(!S.seekDrag){
+    $('seek-inp').value=Math.round(pct*100000);
+    $('seek-fill').style.width=(pct*100)+'%';
+    $('seek-thumb').style.left=(pct*100)+'%';
+  }
+}
+
+// ═══════════════════════════════════════════
+// §11  RENDER FUNCTIONS
+// ═══════════════════════════════════════════
+function renderCtrl(){
+  const pp=$('btn-pp');
+  pp.textContent=S.playing?'⏸':'▶';
+  // sync animated bars
+  document.querySelectorAll('.bars').forEach(b=>b.classList.toggle('paused',!S.playing));
+}
+
+function renderQueue(){
+  const list=$('q-list');
+  $('q-count').textContent=`${S.queue.length} bài`;
+  if(!S.queue.length){
+    list.innerHTML='<li class="q-empty">Thêm bài hát để bắt đầu nghe cùng nhau 🎶</li>';
+    return;
+  }
+  const icons={youtube:'▶️',file:'📁',spotify:'🎵'};
+  list.innerHTML=S.queue.map((t,i)=>{
+    const active=i===S.idx;
+    const thumbContent=t.thumb
+      ?`<img src="${esc(t.thumb)}" alt="" loading="lazy">`
+      :(icons[t.type]||'🎵');
+    return`<li class="q-item${active?' active':''}" data-i="${i}">
+      <span class="q-num">${i+1}</span>
+      <span class="q-bars-wrap"><span class="bars${S.playing?'':' paused'}">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </span></span>
+      <span class="q-thumb">${thumbContent}</span>
+      <span class="q-info">
+        <span class="q-title">${esc(t.title)}</span>
+        <span class="q-by">bởi ${esc(t.addedBy)}</span>
+      </span>
+      <button class="q-del" data-i="${i}" title="Xóa">✕</button>
+    </li>`;
+  }).join('');
+  list.querySelectorAll('.q-item').forEach(el=>{
+    el.addEventListener('dblclick',()=>{
+      const idx=+el.dataset.i;
+      toHost({type:M.R_LOAD,idx});
+    });
+  });
+  list.querySelectorAll('.q-del').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      toHost({type:M.R_RM,idx:+btn.dataset.i});
+    });
+  });
+  // Scroll active into view
+  const active=list.querySelector('.q-item.active');
+  if(active)active.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function renderMembers(){
+  const list=$('mbr-list');
+  const entries=Object.entries(S.members);
+  $('mbr-cnt').textContent=`(${entries.length})`;
+  if(!entries.length){
+    list.innerHTML='<li class="mbr-item"><span style="color:var(--t3);font-size:12px">Chưa có ai</span></li>';
+    return;
+  }
+  list.innerHTML=entries.map(([uid,m])=>{
+    const you=uid===S.uid;
+    const isHostPeer=S.isHost?m.peerId===S.peer?.id:m.peerId===S.hostPid;
+    return`<li class="mbr-item">
+      <span class="mbr-av">${esc((m.name||'?')[0].toUpperCase())}</span>
+      <span class="mbr-info">
+        <span class="mbr-name">${esc(m.name)}${you?' <span style="color:var(--t3);font-size:11px;font-weight:400">(bạn)</span>':''}</span>
+        ${isHostPeer?'<span class="mbr-role">👑 Host</span>':''}
+      </span>
+    </li>`;
+  }).join('');
+}
+
+function sysChat(txt){
+  const el=document.createElement('div');
+  el.className='chat-sys';el.textContent=txt;
+  $('chat-msgs').appendChild(el);scrollChat();
+}
+function renderChat(msg){
+  const el=document.createElement('div');
+  el.className='chat-msg';
+  const t=new Date(msg.t||Date.now()).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+  el.innerHTML=`<div class="chat-msg-top">
+    <span class="chat-uname">${esc(msg.name)}</span>
+    <span class="chat-time">${t}</span>
+  </div>
+  <div class="chat-body">${esc(msg.text)}</div>`;
+  $('chat-msgs').appendChild(el);scrollChat();
+}
+function scrollChat(){const c=$('chat-msgs');c.scrollTop=c.scrollHeight}
+
+function setStatus(txt,cls=''){
+  const el=$('hdr-status');
+  el.textContent=txt;
+  el.className=`status-dot${cls?' st-'+cls:''}`;
+}
+
+// ═══════════════════════════════════════════
+// §12  ROOM MANAGEMENT
+// ═══════════════════════════════════════════
+async function createRoom(){
+  const name=san($('l-cname').value);
+  if(!name){toast('Nhập tên của bạn','err');return}
+  S.name=name;S.isHost=true;S.uid=rid();
+
+  // Try up to 3 codes in case of conflict
+  let attempts=0;
+  async function tryCreate(){
+    S.room=genCode();
+    showLoad('Đang tạo phòng...');
+    try{
+      await initYT();
+      await initPeer(`sb-${S.room}`);
+      S.members[S.uid]={name:san(name,20),peerId:S.peer.id};
+      hideLoad();enterRoom();
+      toast(`Phòng ${S.room} đã sẵn sàng 🎉`,'ok');
+    }catch(e){
+      if(e.message?.includes('đang được sử dụng')&&attempts++<3){
+        if(S.peer){try{S.peer.destroy()}catch(x){} S.peer=null}
+        return tryCreate();
+      }
+      hideLoad();S.isHost=false;
+      if(S.peer){try{S.peer.destroy()}catch(x){} S.peer=null}
+      toast('Lỗi: '+(e.message||'Không thể tạo phòng'),'err');
+    }
+  }
+  await tryCreate();
+}
+
+async function joinRoom(){
+  const name=san($('l-jname').value);
+  const code=$('l-jcode').value.trim().toUpperCase();
+  if(!name){toast('Nhập tên của bạn','err');return}
+  if(!code||!/^[A-Z0-9]{6}$/.test(code)){toast('Mã phòng không hợp lệ (6 ký tự)','err');return}
+  S.name=name;S.isHost=false;S.room=code;S.uid=rid();
+  showLoad('Đang kết nối vào phòng...');
+  try{
+    await initYT();
+    await initPeer();        // random peer ID
+    await connectHost(`sb-${code}`);
+    hideLoad();enterRoom();
+    toast('Đã tham gia phòng 🎉','ok');
+  }catch(e){
+    hideLoad();S.isHost=false;
+    if(S.peer){try{S.peer.destroy()}catch(x){}S.peer=null}
+    toast('Không thể kết nối: '+(e.message||'Phòng không tồn tại hoặc đã đóng'),'err');
+  }
+}
+
+function enterRoom(){
+  $('scr-land').hidden=true;
+  $('scr-room').hidden=false;
+  $('hdr-code').textContent=S.room;
+  $('hdr-host').hidden=!S.isHost;
+  $('file-only-note').hidden=S.isHost;
+  renderMembers();renderQueue();renderCtrl();
+  setStatus('🟢 Đã kết nối','');
+  if(S.isHost){
+    sysChat(`Bạn là Host — chia sẻ mã phòng: ${S.room}`);
+    sysChat('Mời bạn bè vào phòng để nghe nhạc cùng nhau!');
+  } else {
+    sysChat('Đã vào phòng! Double-click vào bài hát để chuyển bài.');
+  }
+}
+
+function leaveRoom(){
+  if(!confirm('Bạn có muốn rời phòng?'))return;
+  if(S.peer){try{S.peer.destroy()}catch(e){}S.peer=null}
+  if(S.ctx){try{S.ctx.close()}catch(e){}S.ctx=null}
+  Object.assign(S,{
+    conns:{},calls:{},queue:[],idx:-1,playing:false,
+    members:{},yt:null,ytOK:false,
+    asSrc:null,asDst:null,isHost:false,pendingLoad:null,
+  });
+  S.aud.src='';S.aud.srcObject=null;
+  $('yt-wrap').classList.remove('show');$('yt-wrap').style.display='none';
+  $('sp-wrap').classList.remove('show');$('sp-wrap').innerHTML='';
+  $('chat-msgs').innerHTML='';
+  $('scr-room').hidden=true;$('scr-land').hidden=false;
+  toast('Đã rời phòng','info');
+}
+
+// ═══════════════════════════════════════════
+// §13  EVENT LISTENERS
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+
+  // ── Landing ──
+  $('l-bcreate').addEventListener('click',createRoom);
+  $('l-bjoin').addEventListener('click',joinRoom);
+  $('l-cname').addEventListener('keydown',e=>e.key==='Enter'&&createRoom());
+  $('l-jcode').addEventListener('keydown',e=>e.key==='Enter'&&joinRoom());
+  $('l-jname').addEventListener('keydown',e=>e.key==='Enter'&&$('l-jcode').focus());
+  $('l-jcode').addEventListener('input',e=>{
+    e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  });
+  // Auto-fill from URL ?room=XXXXXX
+  const urlP=new URLSearchParams(location.search).get('room')||'';
+  if(/^[A-Z0-9]{6}$/i.test(urlP)){
+    $('l-jcode').value=urlP.toUpperCase();
+    setTimeout(()=>$('l-jname').focus(),100);
+  }
+
+  // ── Header ──
+  $('btn-leave').addEventListener('click',leaveRoom);
+  $('btn-copy').addEventListener('click',()=>{
+    navigator.clipboard.writeText(S.room).then(()=>toast('Đã copy mã phòng!','ok'));
+  });
+  $('btn-share').addEventListener('click',()=>{
+    const url=`${location.origin}${location.pathname}?room=${S.room}`;
+    navigator.clipboard.writeText(url).then(()=>toast('Đã copy link mời!','ok'));
+  });
+
+  // ── Playback controls ──
+  $('btn-pp').addEventListener('click',()=>{
+    if(!S.queue.length){toast('Thêm bài hát trước đã!','info');return}
+    if(S.playing)toHost({type:M.R_PAUSE});
+    else toHost({type:M.R_PLAY});
+  });
+  $('btn-next').addEventListener('click',()=>{
+    if(S.isHost)playNext();
+    else toast('Chỉ Host mới có thể chuyển bài','info');
+  });
+  $('btn-prev').addEventListener('click',()=>{
+    if(S.isHost)playPrev();
+    else toast('Chỉ Host mới có thể chuyển bài','info');
+  });
+  $('btn-shuf').addEventListener('click',()=>{
+    if(!S.isHost){toast('Chỉ Host mới có thể thay đổi chế độ phát','info');return}
+    S.shuffle=!S.shuffle;
+    $('btn-shuf').classList.toggle('on',S.shuffle);
+    toast(S.shuffle?'🔀 Shuffle bật':'🔀 Shuffle tắt','info');
+  });
+  $('btn-rep').addEventListener('click',()=>{
+    if(!S.isHost){toast('Chỉ Host mới có thể thay đổi chế độ phát','info');return}
+    S.repeat=!S.repeat;
+    $('btn-rep').classList.toggle('on',S.repeat);
+    toast(S.repeat?'🔁 Lặp lại bật':'🔁 Lặp lại tắt','info');
+  });
+
+  // ── Seek bar ──
+  const seekInp=$('seek-inp');
+  const seekTrk=$('seek-track');
+  const seekFill=$('seek-fill');
+  const seekThumb=$('seek-thumb');
+
+  function seekStart(){S.seekDrag=true;seekTrk.classList.add('drag')}
+  function seekEnd(){
+    S.seekDrag=false;seekTrk.classList.remove('drag');
+    const pct=seekInp.value/100000;
+    const dur=S.isHost?getDur():S.dur;
+    toHost({type:M.R_SEEK,t:pct*dur});
+  }
+
+  seekInp.addEventListener('mousedown',seekStart);
+  seekInp.addEventListener('touchstart',seekStart,{passive:true});
+  seekInp.addEventListener('mouseup',seekEnd);
+  seekInp.addEventListener('touchend',seekEnd);
+
+  seekInp.addEventListener('input',()=>{
+    const pct=seekInp.value/100000;
+    const dur=S.isHost?getDur():S.dur;
+    seekFill.style.width=(pct*100)+'%';
+    seekThumb.style.left=(pct*100)+'%';
+    $('t-cur').textContent=fmt(pct*dur);
+    seekFill.style.transition='none';
+    setTimeout(()=>seekFill.style.transition='',50);
+  });
+
+  // ── Volume ──
+  const volInp=$('vol-inp');
+  volInp.addEventListener('input',()=>{
+    const v=volInp.value/100;
+    S.vol=v;
+    S.aud.volume=v;
+    if(S.yt)try{S.yt.setVolume(volInp.value)}catch(e){}
+    $('vol-pct').textContent=volInp.value+'%';
+    const ic=$('vol-ic');
+    ic.textContent=v===0?'🔇':v<0.4?'🔈':v<0.75?'🔉':'🔊';
+  });
+
+  // ── Keyboard shortcuts ──
+  document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    if($('scr-room').hidden)return;
+    if(e.code==='Space'){e.preventDefault();$('btn-pp').click()}
+    if(e.code==='ArrowLeft'&&S.isHost&&e.altKey){hSeek(Math.max(0,getT()-10))}
+    if(e.code==='ArrowRight'&&S.isHost&&e.altKey){hSeek(getT()+10)}
+  });
+
+  // ── Tab switching (Add track form) ──
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const tab=btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+      btn.classList.add('on');
+      $('tab-'+tab).classList.add('on');
+    });
+  });
+
+  // ── Add YouTube ──
+  function addYT(){
+    const url=$('yt-inp').value.trim();
+    const vid=parseYT(url);
+    if(!vid){toast('URL YouTube không hợp lệ','err');return}
+    toHost({type:M.R_ADD,track:{id:rid(),type:'youtube',videoId:vid,
+      title:'YouTube…',addedBy:san(S.name,20)}});
+    $('yt-inp').value='';
+    toast('Đang thêm vào hàng đợi…','info');
+  }
+  $('btn-addyt').addEventListener('click',addYT);
+  $('yt-inp').addEventListener('keydown',e=>e.key==='Enter'&&addYT());
+
+  // ── Add file ──
+  const fileInp=$('file-inp');
+  const fileZone=$('file-zone');
+  fileInp.addEventListener('change',e=>{
+    const f=e.target.files[0];if(f)handleFile(f);e.target.value='';
+  });
+  fileZone.addEventListener('dragover',e=>{e.preventDefault();fileZone.classList.add('drag')});
+  fileZone.addEventListener('dragleave',()=>fileZone.classList.remove('drag'));
+  fileZone.addEventListener('drop',e=>{
+    e.preventDefault();fileZone.classList.remove('drag');
+    const f=e.dataTransfer.files[0];if(f)handleFile(f);
+  });
+
+  // ── Add Spotify ──
+  function addSP(){
+    const url=$('sp-inp').value.trim();
+    const sp=parseSP(url);
+    if(!sp){toast('URL Spotify không hợp lệ','err');return}
+    toHost({type:M.R_ADD,track:{
+      id:rid(),type:'spotify',
+      spotifyId:sp.id,spotifyType:sp.type,
+      title:`Spotify ${sp.type}`,addedBy:san(S.name,20),
+    }});
+    $('sp-inp').value='';toast('Đã thêm Spotify embed','info');
+  }
+  $('btn-addsp').addEventListener('click',addSP);
+  $('sp-inp').addEventListener('keydown',e=>e.key==='Enter'&&addSP());
+
+  // ── Chat ──
+  function sendChat(){
+    const text=san($('chat-inp').value);
+    if(!text)return;
+    toHost({type:M.CHAT,name:san(S.name,20),text});
+    $('chat-inp').value='';
+  }
+  $('btn-send').addEventListener('click',sendChat);
+  $('chat-inp').addEventListener('keydown',e=>e.key==='Enter'&&sendChat());
+
+  // ── Resume AudioContext on user gesture ──
+  document.addEventListener('click',()=>{
+    if(S.ctx&&S.ctx.state==='suspended')S.ctx.resume();
+  },{once:false,passive:true});
+
+});
+</script>
+</body>
+</html>
