@@ -120,6 +120,15 @@ function onMsg(msg, from) {
                 S.curT = msg.t || 0;
                 S.dur = msg.dur || 0;
                 if (!S.seekDrag) renderSeek();
+                
+                // Đồng bộ thời gian YouTube nếu bị lệch quá 2 giây (do background tab)
+                const tr = S.queue[S.idx];
+                if (tr && tr.type === "youtube" && S.playing) {
+                    const diff = Math.abs(getT() - S.curT);
+                    if (diff > 2) {
+                        applySeek(S.curT);
+                    }
+                }
             }
             break;
         case M.CHAT:

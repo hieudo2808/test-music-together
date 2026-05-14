@@ -10,7 +10,7 @@ function renderQueue() {
         list.innerHTML = '<li class="q-empty">Thêm bài hát để bắt đầu nghe cùng nhau 🎶</li>';
         return;
     }
-    const icons = { youtube: "▶️", file: "📁", spotify: "🎵" };
+    const icons = { youtube: "▶️", file: "📁" };
     list.innerHTML = S.queue
         .map((t, i) => {
             const active = i === S.idx;

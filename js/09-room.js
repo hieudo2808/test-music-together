@@ -125,8 +125,6 @@ function leaveRoom() {
     S.aud.srcObject = null;
     $("yt-wrap").classList.remove("show");
     $("yt-wrap").style.display = "none";
-    $("sp-wrap").classList.remove("show");
-    $("sp-wrap").innerHTML = "";
     $("chat-msgs").innerHTML = "";
     $("scr-room").hidden = true;
     $("scr-land").hidden = false;

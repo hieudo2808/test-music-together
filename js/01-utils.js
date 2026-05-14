@@ -28,19 +28,12 @@ function parseYT(url) {
     const m = url.match(/(?:[?&]v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
     return m ? m[1] : null;
 }
-function parseSP(url) {
-    const m = url?.match(/open\.spotify\.com\/(track|playlist|album|episode)\/([A-Za-z0-9]+)/);
-    return m ? { type: m[1], id: m[2] } : null;
-}
+
 function cleanTrack(t) {
     if (!t || typeof t !== "object") return null;
-    if (!["youtube", "file", "spotify"].includes(t.type)) return null;
+    if (!["youtube", "file"].includes(t.type)) return null;
     if (t.type === "youtube") {
         if (!/^[a-zA-Z0-9_-]{11}$/.test(t.videoId)) return null;
-    }
-    if (t.type === "spotify") {
-        if (!/^[A-Za-z0-9]+$/.test(t.spotifyId)) return null;
-        if (!["track", "playlist", "album", "episode"].includes(t.spotifyType)) return null;
     }
     if (t.type === "file" && !t.title) return null;
     return {
@@ -48,8 +41,6 @@ function cleanTrack(t) {
         type: t.type,
         title: san(t.title || "Unknown", 100),
         videoId: t.videoId || null,
-        spotifyId: t.spotifyId || null,
-        spotifyType: t.spotifyType || null,
         thumb: typeof t.thumb === "string" ? t.thumb : null,
         addedBy: san(t.addedBy || "?", 20),
     };

@@ -127,12 +127,9 @@ function applyLoad(idx, st, play) {
     if (!tr) return;
     S.idx = idx;
     S.playing = !!play;
-    const ytW = $("yt-wrap"),
-        spW = $("sp-wrap");
+    const ytW = $("yt-wrap");
     ytW.classList.remove("show");
     ytW.style.display = "none";
-    spW.classList.remove("show");
-    spW.style.display = "none";
     $("trk-title").textContent = tr.title;
     $("trk-sub").textContent = `Thêm bởi ${tr.addedBy}`;
     const art = $("trk-art");
@@ -148,15 +145,6 @@ function applyLoad(idx, st, play) {
         } else {
             S.pendingLoad = { tr, st, play };
         }
-    } else if (tr.type === "spotify") {
-        spW.style.display = "block";
-        setTimeout(() => spW.classList.add("show"), 10);
-        art.textContent = "🎵";
-        spW.innerHTML = `<iframe
-      src="https://open.spotify.com/embed/${esc(tr.spotifyType)}/${esc(tr.spotifyId)}?utm_source=generator&theme=0"
-      width="100%" height="152" frameborder="0"
-      allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture"
-      style="border-radius:10px"></iframe>`;
     } else {
         art.textContent = "📁";
         if (S.isHost) {

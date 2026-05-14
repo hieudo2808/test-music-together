@@ -520,15 +520,7 @@ button {
 #yt-wrap.show {
     display: block;
 }
-#sp-wrap {
-    display: none;
-    border-radius: var(--r);
-    overflow: hidden;
-    margin-bottom: 16px;
-}
-#sp-wrap.show {
-    display: block;
-}
+
 .trk-row {
     display: flex;
     align-items: center;
@@ -1002,6 +994,14 @@ input[type="range"].vol::-webkit-slider-thumb {
     font-size: 14px;
 }
 @media (max-width: 860px) {
+    .room-body {
+        grid-template-columns: 160px 1fr 220px;
+    }
+    .mbr-role {
+        display: none;
+    }
+}
+@media (max-width: 720px) {
     .room-body {
         grid-template-columns: 1fr 220px;
     }

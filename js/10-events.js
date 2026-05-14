@@ -179,29 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const f = e.dataTransfer.files[0];
         if (f) handleFile(f);
     });
-    function addSP() {
-        const url = $("sp-inp").value.trim();
-        const sp = parseSP(url);
-        if (!sp) {
-            toast("URL Spotify không hợp lệ", "err");
-            return;
-        }
-        toHost({
-            type: M.R_ADD,
-            track: {
-                id: rid(),
-                type: "spotify",
-                spotifyId: sp.id,
-                spotifyType: sp.type,
-                title: `Spotify ${sp.type}`,
-                addedBy: san(S.name, 20),
-            },
-        });
-        $("sp-inp").value = "";
-        toast("Đã thêm Spotify embed", "info");
-    }
-    $("btn-addsp").addEventListener("click", addSP);
-    $("sp-inp").addEventListener("keydown", (e) => e.key === "Enter" && addSP());
+
     function sendChat() {
         const text = san($("chat-inp").value);
         if (!text) return;
