@@ -5,6 +5,31 @@
 // §13  EVENT LISTENERS
 // ═══════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", () => {
+    // ── Session ──
+    if (S.name) {
+        $("l-cname").value = S.name;
+        $("l-jname").value = S.name;
+    }
+    window.addEventListener("beforeunload", () => {
+        if (S.peer) {
+            try {
+                S.peer.destroy();
+            } catch (e) {}
+        }
+    });
+
+    // ── Theme ──
+    const savedTheme = localStorage.getItem("syncbeat_theme");
+    if (savedTheme === "light") {
+        document.documentElement.classList.add("light-theme");
+    }
+    document.querySelectorAll(".btn-theme-toggle").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const isLight = document.documentElement.classList.toggle("light-theme");
+            localStorage.setItem("syncbeat_theme", isLight ? "light" : "dark");
+        });
+    });
+
     // ── Landing ──
     $("l-bcreate").addEventListener("click", createRoom);
     $("l-bjoin").addEventListener("click", joinRoom);
@@ -215,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function sendChat() {
         const text = san($("chat-inp").value);
         if (!text) return;
-        toHost({ type: M.CHAT, name: san(S.name, 20), text });
+        toHost({ type: M.R_CHAT, name: san(S.name, 20), text });
         $("chat-inp").value = "";
     }
     $("btn-send").addEventListener("click", sendChat);

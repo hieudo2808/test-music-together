@@ -11,8 +11,8 @@ async function createRoom() {
         return;
     }
     S.name = name;
+    localStorage.setItem("syncbeat_name", name);
     S.isHost = true;
-    S.uid = rid();
 
     // Try up to 3 codes in case of conflict
     let attempts = 0;
@@ -62,9 +62,9 @@ async function joinRoom() {
         return;
     }
     S.name = name;
+    localStorage.setItem("syncbeat_name", name);
     S.isHost = false;
     S.room = code;
-    S.uid = rid();
     showLoad("Đang kết nối vào phòng...");
     try {
         await initYT();

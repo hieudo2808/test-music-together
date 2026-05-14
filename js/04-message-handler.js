@@ -76,7 +76,7 @@ function onMsg(msg, from) {
                 bcastSelf({ type: M.QUEUE, queue: S.queue });
                 break;
             }
-            case M.CHAT: {
+            case M.R_CHAT: {
                 if (!RL.chat()) break;
                 const cm = {
                     type: M.CHAT,

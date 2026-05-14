@@ -4,10 +4,22 @@
 // ═══════════════════════════════════════════
 // §2  STATE
 // ═══════════════════════════════════════════
+function getUid() {
+    let u = localStorage.getItem("syncbeat_uid");
+    if (!u) {
+        // Sinh ra một chuỗi độc nhất vô nhị (UUID) cho thiết bị này
+        u = window.crypto && crypto.randomUUID 
+            ? crypto.randomUUID() 
+            : "u_" + Date.now().toString(36) + rid(8);
+        localStorage.setItem("syncbeat_uid", u);
+    }
+    return u;
+}
+
 const S = {
     // identity
-    uid: rid(),
-    name: "",
+    uid: getUid(),
+    name: localStorage.getItem("syncbeat_name") || "",
     room: "",
     isHost: false,
     // network
@@ -67,6 +79,7 @@ const M = {
     R_LOAD: "r_load",
     R_ADD: "r_add",
     R_RM: "r_rm",
+    R_CHAT: "r_chat",
 };
 const ALL_M = new Set(Object.values(M));
 

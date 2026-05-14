@@ -19,6 +19,7 @@
     <!-- ║    LANDING SCREEN   ║ -->
     <!-- ╚══════════════════════╝ -->
     <div id="scr-land">
+        <button class="btn-icon btn-theme-toggle" style="position:absolute; top:20px; right:20px; font-size:20px;" title="Đổi giao diện">🌓</button>
         <div class="land-hero">
             <div class="land-icon">🎵</div>
             <h1>SyncBeat</h1>
@@ -56,13 +57,19 @@
         <header class="room-hdr">
             <span class="logo-sm">SyncBeat</span>
             <div class="room-code-pill">
-                Phòng&nbsp;<strong id="hdr-code">------</strong>
-                <button class="btn-icon" id="btn-copy" title="Copy mã phòng">📋</button>
-                <button class="btn-icon" id="btn-share" title="Copy link mời">🔗</button>
+                <span class="code-label">Mã phòng:</span>
+                <strong id="hdr-code">------</strong>
+                <div class="code-actions">
+                    <button class="btn-text" id="btn-copy">Copy Mã</button>
+                    <button class="btn-text" id="btn-share">Copy Link</button>
+                </div>
             </div>
-            <span class="host-pill" id="hdr-host" hidden>👑 Host</span>
-            <span class="status-dot" id="hdr-status">🟢 Đã kết nối</span>
-            <button class="btn-leave" id="btn-leave">Rời Phòng</button>
+            <div class="hdr-right">
+                <button class="btn-icon btn-theme-toggle" title="Đổi giao diện">🌓</button>
+                <span class="host-pill" id="hdr-host" hidden>👑 Host</span>
+                <span class="status-dot" id="hdr-status">🟢 Đã kết nối</span>
+                <button class="btn-leave" id="btn-leave">Rời Phòng</button>
+            </div>
         </header>
 
         <!-- Body -->
